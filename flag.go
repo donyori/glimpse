@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/donyori/gogo/copyright/agpl3"
 )
@@ -68,6 +69,9 @@ func Parse() error {
 		w := flag.CommandLine.Output()
 		// Ignore errors in the following print functions.
 		programName := filepath.Base(os.Args[0])
+		if i := strings.LastIndex(programName, "."); i >= 0 {
+			programName = programName[:i]
+		}
 		fmt.Fprintf(w, "Usage of %s: [options] filename [[start] length]\n", programName)
 		fmt.Fprintln(w, "\nIf the file is a regular file, print a part of the file.")
 		fmt.Fprintln(w, "If the file is a directory, list the content files.")
@@ -78,7 +82,7 @@ func Parse() error {
 		fmt.Fprintln(w, "Default value - start: 0; length: 50 lines (in text mode) or 1024 bytes (in binary mode)")
 		fmt.Fprintln(w, "\nOptions:")
 		flag.PrintDefaults()
-		fmt.Fprintln(w, "\n----------------------------------------")
+		fmt.Fprintln(w)
 		agpl3.PrintNotice(w, programName, "2020", "Yuan Gao", "https://github.com/donyori/glimpse")
 	}
 	flag.Parse()
