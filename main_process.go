@@ -88,9 +88,10 @@ func MainProcess() error {
 	if Option.Binary {
 		// Binary mode.
 		_, err = io.CopyN(ioutil.Discard, reader, Option.Start)
-		if errors.Is(err, io.EOF) {
-			return nil
-		} else if err != nil {
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
 			return err
 		}
 
@@ -109,31 +110,22 @@ func MainProcess() error {
 	} else {
 		// Text mode.
 		for count := int64(0); count < Option.Start; count++ {
-			more := true
-			for more {
-				_, more, err = reader.ReadLine()
+			_, err = reader.WriteLineTo(ioutil.Discard)
+			if err != nil {
 				if errors.Is(err, io.EOF) {
 					return nil
-				} else if err != nil {
-					return err
 				}
+				return err
 			}
 		}
 
-		var line []byte
 		for count := int64(0); count < Option.Length; count++ {
-			more := true
-			for more {
-				line, more, err = reader.ReadLine()
+			_, err = reader.WriteLineTo(out)
+			if err != nil {
 				if errors.Is(err, io.EOF) {
 					return nil
-				} else if err != nil {
-					return err
 				}
-				_, err = out.Write(line)
-				if err != nil {
-					return err
-				}
+				return err
 			}
 			_, err = fmt.Fprintln(out)
 			if err != nil {
